@@ -3,24 +3,32 @@
 input_dir=$1
 output_dir=$2
 
+mkdir -p "$output_dir"
+
 copy_file(){
 	local src=$1
 	local dst_dir=$2
-	local filename=$(basename -- "$src")
-	local extension="${filename##*.}"
-	local basename="${filename%.*}"
 
-	local counter=1
-	local dest_file="${dest_path}/${basename}.${extension}"
-	while [-f "$dest_file" ]; do
-		dest_file="${dest_path}/${basename}_${counter}.${extension}"
-		let counter+=1
+	find "$src" -type f | while read file_path; do
+		filename=$(basename -- "$file_path")
+
+		dest_file_path="$dst_dir/$file_name"
+		counter=1
+
+		while [-f "$dest_file_path" ]; do
+			base_name="${filename%.*}"
+			extens="${filename##*.}"
+			if [[ $filename == *.*]]; then
+				dest_file_path="$dest_dir/${base_name}_$counter.$extension"
+			else
+				dest_file_path="$dest_dir/${base_name}_$counter"
+			fi
+			((counter++))
+		done
+
+		cp "$file_path" "$dest_file_path"
 	done
-
-	cp -p "$src_path" "$dest_file"
 }
 
-find "$input_dir" -type f -print | while IFS= read -r -d $'\0' file; do
-	copy_with_unique_name "$file" "$output_dir"
-done
+copy_file "$input_dir" "$output_dir"
 
