@@ -6,29 +6,27 @@ output_dir=$2
 mkdir -p "$output_dir"
 
 copy_file(){
-	local src=$1
-	local dst_dir=$2
+    local src=$1
+    local dst_dir=$2
 
-	find "$src" -type f | while read file_path; do
-		filename=$(basename -- "$file_path")
+    find "$src" -type f | while read file_path; do
+        filename=$(basename -- "$file_path")
+        dest_file_path="$dst_dir/$filename"
+        counter=1
 
-		dest_file_path="$dst_dir/$file_name"
-		counter=1
+        while [ -f "$dest_file_path" ]; do
+            base_name="${filename%.*}"
+            extension="${filename##*.}"
+            if [[ "$filename" == *.* ]]; then
+                dest_file_path="$dst_dir/${base_name}_$counter.$extension"
+            else
+                dest_file_path="$dst_dir/${base_name}_$counter"
+            fi
+            ((counter++))
+        done
 
-		while [-f "$dest_file_path" ]; do
-			base_name="${filename%.*}"
-			extens="${filename##*.}"
-			if [[ $filename == *.*]]; then
-				dest_file_path="$dest_dir/${base_name}_$counter.$extension"
-			else
-				dest_file_path="$dest_dir/${base_name}_$counter"
-			fi
-			((counter++))
-		done
-
-		cp "$file_path" "$dest_file_path"
-	done
+        cp "$file_path" "$dest_file_path"
+    done
 }
 
 copy_file "$input_dir" "$output_dir"
-
